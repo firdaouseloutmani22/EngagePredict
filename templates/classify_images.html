@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction of Student Engagement and Motivation (Image)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+   <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+             padding-top: 60px;
+        }
+         .navbar {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre pour la navbar */
+        }
+
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            color: #34495e;
+            font-weight: 500;
+        }
+
+        #drop-zone {
+            border: 2px dashed #bdc3c7;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+            color: #7f8c8d;
+            cursor: pointer;
+        }
+
+        .uploaded-video-preview {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-upload {
+            margin-top: 15px;
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .btn-upload:hover {
+            background-color: #2980b9;
+        }
+
+        video {
+            width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+        }
+
+        .result-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .result-container h4 {
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background-color: #2ecc71;
+            border-color: #27ae60;
+        }
+
+        .btn-primary:hover {
+            background-color: #27ae60;
+        }
+
+        .form-control {
+            border-radius: 10px;
+        }
+
+       .uploaded-image-preview {
+    max-width: 100%; /* S'assure que l'image ne dépasse pas la largeur du conteneur */
+    height: auto;    /* Ajuste la hauteur automatiquement pour conserver les proportions */
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container-fluid">
+            <img src="static/assets/img/school.png" alt="Logo" class="logo-img" style="height: 40px;">
+            <a class="navbar-brand" href="#">Student Engagement</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto justify-content-center" style="flex-direction: row; width: 100%;">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/classify_video">Videos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/real-time">Real-time</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Prediction of Student Engagement and Motivation (Image)</h2>
+        <div class="row">
+            <!-- Left Column: Model selection and image upload -->
+            <div class="col-md-6">
+                <!-- Model selection -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Choose a Model</h5>
+                        <form method="POST" id="model-form">
+                            <select name="model" class="form-select" aria-label="Sélectionner un modèle" onchange="submitModelForm();">
+                                <option value="">-- Choose a Model --</option>
+                                <option value="CNN">CNN</option>
+                            </select>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Image upload -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Upload an Image</h5>
+                        <form id="upload-form" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="image-upload">Upload an image :</label>
+                                <div id="drop-zone" class="form-control" onclick="document.getElementById('image-upload').click();">
+                                    <span class="text-muted">Drag and drop the file here or click to upload</span>
+                                    <input type="file" id="image-upload" name="image" class="form-control-file" accept="image/*" required style="display:none;">
+                                </div>
+                                <small class="form-text text-muted">Limit of 10 MB per file (JPEG, PNG)</small>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-upload w-100">Prediction </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Image preview, prediction result, and accuracy -->
+            <div class="col-md-6">
+                <!-- Image Preview -->
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Uploaded Image</h5>
+                        <img id="uploaded-image" class="uploaded-image-preview">
+                    </div>
+                </div>
+
+                <!-- Prediction and Accuracy Display -->
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Prediction Result</h5>
+                        <div id="prediction-result"></div>
+                        <div id="accuracy-result"></div>
+                        <div id="download-link"></div> <!-- Espace pour le lien de téléchargement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Afficher l'image téléchargée
+        document.getElementById('image-upload').onchange = function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const imageElement = document.getElementById('uploaded-image');
+                const url = URL.createObjectURL(file);
+                imageElement.src = url;
+                imageElement.style.display = 'block'; // Affiche l'image
+            }
+        };
+
+        // Soumettre le formulaire de sélection du modèle
+        function submitModelForm() {
+            const form = document.getElementById('model-form');
+            const formData = new FormData(form);
+            fetch('/select_model', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.message || data.error);
+            })
+            .catch(error => console.error('Erreur lors de la sélection du modèle:', error));
+        }
+
+        // Soumettre le formulaire de téléchargement de l'image et gérer la prédiction
+        document.getElementById('upload-form').onsubmit = function (event) {
+            event.preventDefault();  // Empêche le rechargement de la page
+            const formData = new FormData(this);
+            fetch('/upload_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.download_link) {
+                    document.getElementById('download-link').innerHTML = `
+                        <a href="${data.download_link}" download="annotated_image.jpg" class="btn btn-primary mt-3">Download</a>
+                    `;
+                    document.getElementById('prediction-result').innerHTML = '';
+                    document.getElementById('accuracy-result').innerHTML = '';
+                } else if (data.prediction && data.accuracy) {
+                    document.getElementById('prediction-result').innerHTML = `
+                        <h4 class="text-success">Prediction: ${data.prediction}</h4>
+                    `;
+                    document.getElementById('accuracy-result').innerHTML = `
+                        <h4 class="text-info">Précision: ${data.accuracy}%</h4>
+                    `;
+                } else {
+                    document.getElementById('prediction-result').innerHTML = `
+                        <h4 class="text-danger">Erreur: ${data.error || 'Prédiction échouée.'}</h4>
+                    `;
+                    document.getElementById('accuracy-result').innerHTML = '';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                document.getElementById('prediction-result').innerHTML = `
+                    <h4 class="text-danger">Erreur lors de la prédiction.</h4>
+                `;
+                document.getElementById('accuracy-result').innerHTML = '';
+            });
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

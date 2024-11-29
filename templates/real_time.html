@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction en Temps Réel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+       <style>
+        body {
+            background-color: #f0f2f5; /* Couleur de fond */
+            font-family: 'Arial', sans-serif; /* Police */
+            color: #333; /* Couleur du texte */
+            padding-top: 60px; /* Espacement supérieur pour la navbar */
+        }
+
+        .navbar {
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre pour la navbar */
+        }
+
+        .container {
+            max-width: 900px; /* Largeur maximale */
+            margin: 50px auto; /* Centrage avec marge supérieure */
+            background-color: #fff; /* Couleur de fond du conteneur */
+            padding: 30px; /* Espacement interne */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre */
+            border-radius: 10px; /* Bords arrondis */
+        }
+
+        h1, h2 {
+            color: #2c3e50; /* Couleur des titres */
+            margin-bottom: 30px; /* Espacement inférieur */
+        }
+
+        h1 {
+            font-weight: 700; /* Épaisseur de police pour h1 */
+            text-align: center; /* Centrer le texte */
+        }
+
+        h2 {
+            font-weight: 600; /* Épaisseur de police pour h2 */
+        }
+
+        .card {
+            border: none; /* Pas de bordure */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Ombre */
+            border-radius: 10px; /* Bords arrondis */
+            margin-bottom: 20px; /* Espacement inférieur */
+        }
+
+        .card-title {
+            font-size: 18px; /* Taille de police */
+            color: #34495e; /* Couleur du texte */
+            font-weight: 500; /* Épaisseur de police */
+        }
+
+        button, .btn-upload {
+            background-color: #3498db; /* Couleur de fond */
+            color: #fff; /* Couleur du texte */
+            padding: 12px 20px; /* Espacement interne */
+            font-size: 16px; /* Taille de police */
+            border: none; /* Pas de bordure */
+            border-radius: 8px; /* Bords arrondis */
+            transition: background-color 0.3s ease; /* Transition pour le survol */
+            margin-top: 20px; /* Espacement supérieur */
+        }
+
+        button:hover, .btn-upload:hover {
+            background-color: #2980b9; /* Couleur de fond au survol */
+        }
+
+        #video-feed {
+            border-radius: 10px; /* Bords arrondis */
+            margin-top: 30px; /* Espacement supérieur */
+            border: 2px solid #ccc; /* Bordure */
+            display: none; /* Masquer par défaut */
+        }
+
+        .text-muted {
+            margin-top: 10px; /* Espacement supérieur */
+            text-align: center; /* Centrer le texte */
+        }
+
+        #drop-zone {
+            border: 2px dashed #bdc3c7; /* Bordure en pointillé */
+            padding: 30px; /* Espacement interne */
+            text-align: center; /* Centrer le texte */
+            border-radius: 10px; /* Bords arrondis */
+            background-color: #ecf0f1; /* Couleur de fond */
+            color: #7f8c8d; /* Couleur du texte */
+            cursor: pointer; /* Curseur en pointeur */
+        }
+
+        .uploaded-video-preview {
+            max-width: 100%; /* Largeur maximale */
+            border-radius: 10px; /* Bords arrondis */
+            margin-top: 15px; /* Espacement supérieur */
+        }
+
+        .result-container {
+            margin-top: 20px; /* Espacement supérieur */
+            text-align: center; /* Centrer le texte */
+        }
+
+        .result-container h4 {
+            margin-bottom: 10px; /* Espacement inférieur */
+        }
+
+        .btn-primary {
+            background-color: #2ecc71; /* Couleur de fond */
+            border-color: #27ae60; /* Couleur de la bordure */
+        }
+
+        .btn-primary:hover {
+            background-color: #27ae60; /* Couleur de fond au survol */
+        }
+
+        .form-control {
+            border-radius: 10px; /* Bords arrondis */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container-fluid">
+             <img src="static/assets/img/school.png" alt="Logo" class="logo-img" style="height: 40px;">
+            <a class="navbar-brand" href="#">Student Engagement</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto justify-content-center" style="flex-direction: row; width: 100%;">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/classify_images">Images</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/classify_video">Video</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Real-Time Prediction</h1>
+
+        <!-- Model selection -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Choose a Model</h5>
+                <form id="model-form">
+                    <select name="model" id="model-select" class="form-control" aria-label="Sélectionner un modèle">
+                        <option value="">-- Select a Model --</option>
+                        <option value="CNN">CNN</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <!-- Real-time video feed -->
+        <img id="video-feed" src="" width="640" height="480" alt="Flux vidéo en temps réel">
+
+        <!-- Start and stop buttons -->
+        <div class="text-center">
+            <button onclick="startPrediction()">Start Prediction</button>
+            <button onclick="stopPrediction()">Stop Prediction</button>
+            <p class="text-muted">The video stream will begin once the prediction has started.</p>
+        </div>
+    </div>
+
+    <script>
+        function startPrediction() {
+            const modelSelect = document.getElementById('model-select');
+            const selectedModel = modelSelect.value;
+
+            // Vérifiez si un modèle est sélectionné
+            if (selectedModel === "") {
+                alert("Please select a model before starting the prediction.");
+                return;
+            }
+
+            // Envoyer la requête pour démarrer la prédiction
+            fetch('/start_real_time', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ model: selectedModel })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    console.log(data.message);
+                    alert('Real-time prediction started with the model: ' + selectedModel);
+                    // Afficher la vidéo et définir le src
+                    const videoFeed = document.getElementById('video-feed');
+                    videoFeed.src = "{{ url_for('video_feed') }}";
+                    videoFeed.style.display = 'block';
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Erreur lors du démarrage de la prédiction:', error));
+        }
+
+        function stopPrediction() {
+            fetch('/stop_real_time', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    console.log(data.message);
+                    alert('Real-time prediction stopped.');
+                    // Masquer la vidéo et enlever le src
+                    const videoFeed = document.getElementById('video-feed');
+                    videoFeed.src = "";
+                    videoFeed.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Erreur lors de l\'arrêt de la prédiction:', error));
+        }
+    </script>
+</body>
+
+</html>
